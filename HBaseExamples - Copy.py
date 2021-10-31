@@ -1,17 +1,18 @@
-from starbase import Connection
-
-c = Connection("127.0.0.1", "8000")
-
-ratings = c.table('ratings')
-
-
-
-print ("Get back ratings for some users...\n")
-print ("Ratings for user ID 1:\n")
-print (ratings.fetch("1"))
-print ("Ratings for user ID 33:\n")
-print (ratings.fetch("33"))
-
-ratings.drop()
-print("Parsing the ml-100k ratings data...\n")
-ratingFile = open("e:/Downloads/ml-100k/ml-100k/u.data", "r")
+import pygame
+pygame.init()
+dis=pygame.display.set_mode((400,300))
+ 
+pygame.display.set_caption('Snake game by Edureka')
+ 
+blue=(0,0,255)
+red=(255,0,0)
+ 
+game_over=False
+while not game_over:
+    for event in pygame.event.get():
+        if event.type==pygame.QUIT:
+            game_over=True
+    pygame.draw.rect(dis,blue,[200,150,10,10])
+    pygame.display.update()
+pygame.quit()
+quit()
