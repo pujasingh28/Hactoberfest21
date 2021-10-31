@@ -1,48 +1,58 @@
-from pyspark.sql import SparkSession
-from pyspark.sql import Row
-from pyspark.sql import functions
-
-def loadMovieNames():
-    movieNames = {}
-    with open("ml-100k/u.item") as f:
-        for line in f:
-            fields = line.split('|')
-            movieNames[int(fields[0])] = fields[1]
-    return movieNames
-
-def parseInput(line):
-    fields = line.split()
-    return Row(movieID = int(fields[1]), rating = float(fields[2]))
-
-if __name__ == "__main__":
-    # Create a SparkSession
-    spark = SparkSession.builder.appName("PopularMovies").getOrCreate()
-
-    # Load up our movie ID -> name dictionary
-    movieNames = loadMovieNames()
-
-    # Get the raw data
-    lines = spark.sparkContext.textFile("hdfs:///user/maria_dev/ml-100k/u.data")
-    # Convert it to a RDD of Row objects with (movieID, rating)
-    movies = lines.map(parseInput)
-    # Convert that to a DataFrame
-    movieDataset = spark.createDataFrame(movies)
-
-    # Compute average rating for each movieID
-    averageRatings = movieDataset.groupBy("movieID").avg("rating")
-
-    # Compute count of ratings for each movieID
-    counts = movieDataset.groupBy("movieID").count()
-
-    # Join the two together (We now have movieID, avg(rating), and count columns)
-    averagesAndCounts = counts.join(averageRatings, "movieID")
-
-    # Pull the top 10 results
-    topTen = averagesAndCounts.orderBy("avg(rating)").take(10)
-
-    # Print them out, converting movie ID's to names as we go.
-    for movie in topTen:
-        print (movieNames[movie[0]], movie[1], movie[2])
-
-    # Stop the session
-    spark.stop()
+M = 9
+def puzzle(a):
+    for i in range(M):
+        for j in range(M):
+            print(a[i][j],end = " ")
+        print()
+def solve(grid, row, col, num):
+    for x in range(9):
+        if grid[row][x] == num:
+            return False
+             
+    for x in range(9):
+        if grid[x][col] == num:
+            return False
+ 
+ 
+    startRow = row - row % 3
+    startCol = col - col % 3
+    for i in range(3):
+        for j in range(3):
+            if grid[i + startRow][j + startCol] == num:
+                return False
+    return True
+ 
+def Suduko(grid, row, col):
+ 
+    if (row == M - 1 and col == M):
+        return True
+    if col == M:
+        row += 1
+        col = 0
+    if grid[row][col] > 0:
+        return Suduko(grid, row, col + 1)
+    for num in range(1, M + 1, 1): 
+     
+        if solve(grid, row, col, num):
+         
+            grid[row][col] = num
+            if Suduko(grid, row, col + 1):
+                return True
+        grid[row][col] = 0
+    return False
+ 
+'''0 means the cells where no value is assigned'''
+grid = [[2, 5, 0, 0, 3, 0, 9, 0, 1],
+        [0, 1, 0, 0, 0, 4, 0, 0, 0],
+    [4, 0, 7, 0, 0, 0, 2, 0, 8],
+    [0, 0, 5, 2, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 9, 8, 1, 0, 0],
+    [0, 4, 0, 0, 0, 3, 0, 0, 0],
+    [0, 0, 0, 3, 6, 0, 0, 7, 2],
+    [0, 7, 0, 0, 0, 0, 0, 0, 3],
+    [9, 0, 3, 0, 0, 0, 6, 0, 4]]
+ 
+if (Suduko(grid, 0, 0)):
+    puzzle(grid)
+else:
+    print("Solution does not exist:(")
